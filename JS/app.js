@@ -99,16 +99,26 @@ $(function () {
 
         /*Mouvement de la flèche*/
         moveArrow(){
-            let ctn = $(".outerClick--container");
-            /*right max*/
-            let rightBoundary = 1200;
-            ctn.on("mousemove", event => {
-                let pointX = event.pageX;
-                if (event.pageX <= rightBoundary) {
-                    $(".selector").css("left", pointX + "px");
-                }
-            });
+            const ctn = $("#game");
+            const arrow = $(".selector");
 
+            // place la flèche au centre par défaut
+            const center = () => {
+                const w = ctn.outerWidth();
+                const left = ctn.offset().left;
+                arrow.css("left", (left + w/2) + "px");
+            };
+
+            center();
+            $(window).on("resize", center);
+
+            ctn.on("mousemove", (event) => {
+                const left = ctn.offset().left;
+                const right = left + ctn.outerWidth();
+                // clamp dans les bords du conteneur
+                const x = Math.max(left, Math.min(event.pageX, right));
+                arrow.css("left", x - 50 + "px");
+            });
         }
 
         set(row, column, player) {
@@ -450,11 +460,22 @@ $(function () {
                     $colorPicker.css("pointer-events", "none");
                 }
 
+                if ($btn.hasClass("ready--btn1")) {
+                    $('html, body').animate({
+                        scrollTop: $(".ready--btn2").offset().top - 100 // petit décalage visuel
+                    }, 500); // durée en ms
+                }
+
             })
 
             $input.on('keyup', function () {
-                $name.html($(this).val());
-            })
+                if ($(this).val().trim() === "") {
+                    // Si vide → garder le pseudo par défaut
+                    $name.html($input.attr("placeholder"));
+                } else {
+                    $name.html($(this).val());
+                }
+            });
         }
 
         /*Couleur aléatoire*/
@@ -498,6 +519,26 @@ $(function () {
 
     /*Création de l'objet de la classe Interface*/
     let obj = new Interface($('#Page1'), $('#Page2'), $('#Page3'), sound);
+
+    $('.pseudo__user1').val("Joueur 1");
+    $('.name__player1').text("Joueur 1");
+
+    $('.pseudo__user2').val("Joueur 2");
+    $('.name__player2').text("Joueur 2");
+
+    // Couleur par défaut Joueur 1
+    $('.player1__avatar')
+        .css('background', '#ff4949') // rouge par défaut
+        .removeClass()
+        .addClass('player1__avatar color__2');
+    $('#color-2').prop('checked', true); // coche le bon bouton
+
+// Couleur par défaut Joueur 2
+    $('.player2__avatar')
+        .css('background', '#ff0') // jaune par défaut
+        .removeClass()
+        .addClass('player2__avatar color__1');
+    $('#color-4').prop('checked', true); // coche le bon bouton
 })
 
 

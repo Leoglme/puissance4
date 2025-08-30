@@ -4,8 +4,7 @@
 
 body{
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-    background: url('../Assets/Images/retro-game-background.jpg');
-    background-size: cover;
+    background: url('../Assets/Images/retro-game-background.jpg') center / cover fixed no-repeat;
 }
 
 /*Puissance 4*/
@@ -167,19 +166,8 @@ td {
     border-color: #7d2a40  !important;
 }
 .fullscreen, .cancel, .paused{
-    position: absolute;
+    position: relative;
     top: .5em;
-}
-.fullscreen{
-    right: 5em;
-}
-
-.cancel{
-    right: 8em;
-}
-
-.paused{
-    left: 2em;
 }
 
 .fa-expand , .fa-undo, .fa-pause{
@@ -193,8 +181,9 @@ td {
 
 /*Home page*/
 .p4_logo{
-    width: 25%;
+    width: 60vw;
     margin-top: 100px;
+    max-width: 400px;
 }
 
 .brand__container{
@@ -224,8 +213,7 @@ td {
 }
 
 .sound{
-    position: absolute;
-    right: 2em;
+    position: relative;
     top: .5em;
 }
 .sound:active , .fullscreen:active , .cancel:active , .paused:active{
@@ -280,13 +268,8 @@ td {
     text-transform: capitalize;
     margin-bottom: 40px;
     font-family: 'Press Start 2P', cursive;
-}
-
-.round__player{
-    position: absolute;
-    bottom: 7%;
-    left: 37%;
-    margin: 0;
+    text-align: center;
+    line-height: 50px;
 }
 
 .player1__avatar, .player2__avatar{
@@ -508,6 +491,30 @@ td {
     animation-duration: 400ms;
 }
 
+.arcade_buttons {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    gap: 45px;
+    padding: 0 20px;
+}
+
+@media (max-width: 768px){
+    .arcade_buttons {
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 10px;
+    }
+}
+
+@media (max-width: 1200px){
+    #Page2 {
+        flex-direction: column;
+        gap: 64px;
+        padding: 64px 0;
+    }
+}
+
 @keyframes fall-animation{
    from{
        transform: translateY(-500px);
@@ -517,5 +524,188 @@ td {
     }
 }
 
+.arcade_buttons_game {
+    position: fixed;
+    width: 100%;
+    display: flex;
+    gap: 24px;
+    justify-content: flex-end;
+    padding: 0 20px;
+}
 
+.round__player {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* ======= MOBILE ONLY: Page 3 ergonomique ======= */
+@media (max-width: 1350px) {
+    /* Empêche le débordement horizontal */
+    html, body {
+        max-height: 100vh;
+        height: 100%;
+        overflow-x: hidden;
+    }
+
+    #Page3 {
+        height: 100%;
+    }
+
+    /* Barre boutons jeu (déjà fixed) un peu plus compacte */
+    .arcade_buttons_game {
+        gap: 12px;
+        padding: 0 10px;
+        bottom: 45px;
+        z-index: 60;
+        justify-content: center;
+    }
+
+    /* On laisse le plateau prendre la place, sans forcer le flex desktop */
+    .container-fluid.d-flex {
+        display: block;
+        justify-content: center !important; /* ne change rien en desktop */
+    }
+
+    /* Plateau centré + marges */
+    #game {
+        position: relative;
+        align-items: center;
+        min-height: unset;
+        top: 300px;
+    }
+
+    /* Cases: passer des cm -> vw UNIQUEMENT en mobile */
+    .cell {
+        width: 13.5vw;
+        height: 13.5vw;
+        border-width: 6px;
+        float: left; /* conserve ta grille */
+    }
+    .cell:before { box-shadow: 0 180px 0 220px #0000ff; }
+
+    /* Bande cliquable au-dessus des colonnes */
+    .outerClick--container {
+        margin: 0 auto;
+        gap: 6px;
+        width: auto;
+        max-width: 100%;
+        position: absolute;
+        top: 0;                /* ajuste si besoin (ex: 6px/12px) */
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+    }
+    .outerClick {
+        width: 13.5vw;
+        height: 22vw;
+        margin-right: 0;
+    }
+
+    /* Flèche plus compacte */
+    .selector {
+        display: none;
+    }
+
+    .leftFoot, .rightFoot {
+        width: 20px;
+        height: 80px;
+    }
+
+    .leftFoot::after, .rightFoot::after {
+        border-left-width: 30px;
+        border-right-width: 30px;
+        border-bottom-width: 80px;
+        top: 28px;
+        left: -20px;
+    }
+
+    /* Badges joueurs FIXES en haut (gauche/droite) pour éviter le scroll */
+    .player__container {
+        position: fixed;
+        top: 32px;           /* sous la barre des boutons */
+        z-index: 55;
+        background: rgba(0,0,0,0.25);
+        backdrop-filter: blur(2px);
+        border-radius: 12px;
+        padding: 6px 8px;
+        gap: 6px;
+    }
+    /* 1er joueur à gauche, 2e à droite (selon ton HTML) */
+    #Page3 .container-fluid .player__container:first-of-type { left: 0; }
+    #Page3 .container-fluid .player__container:last-of-type  { right: 0; }
+
+    /* Titre compact */
+    .player__container .interface__title {
+        font-size: 12px;
+        margin: 0 0 4px;
+        line-height: 1.2;
+        text-align: center;
+    }
+
+    /* Avatar + score compacts dans le badge */
+    #Page3 .player1__avatar, #Page3 .player2__avatar {
+        width: 48px;
+        height: 48px;
+        margin: 0;
+    }
+    #Page2 .player1__avatar, #Page2 .player2__avatar {
+        width: 180px;
+    }
+    .score {
+        width: 36px;
+        height: 36px;
+        font-size: 22px;
+        line-height: 36px;
+        top: 0;
+        margin-top: 4px;
+    }
+
+    /* Texte "à toi de jouer" sous le plateau */
+    .round__player {
+        top: 200px;
+        margin: 10px 0 0 !important;
+        text-align: center !important;
+        font-size: 14px !important;
+        height: fit-content;
+        user-select: none;
+    }
+
+    #Page3 .arcade__btn i {
+        font-size: 28px;
+    }
+
+    #Page3 .arcade__btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 53px;
+        font-size: 35px;
+    }
+
+    #Page3 .modal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    /* encore un cran de compaction si très petit écran */
+    .cell {
+        width: 12.5vw;
+        height: 12.5vw;
+        border-width: 5px;
+    }
+    .outerClick { width: 14.5vw; height: 24vw; }
+    #Page3 .player1__avatar, #Page3 .player2__avatar { width: 44px; height: 44px; }
+    .score {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+        line-height: 35px;
+        margin-bottom: 10px !important;
+    }
+}
 

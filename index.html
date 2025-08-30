@@ -9,13 +9,17 @@
     <title>Puissance 4</title>
     <script src="https://kit.fontawesome.com/b574b73ebd.js"></script>
     <script src="JS/app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://umami.dibodev.fr/script.js" data-website-id="c2dc1ca7-7219-4a44-8719-aa9c11402905" defer></script>
 </head>
 <body>
 
 <!--Home-->
 <div id="Page1">
-    <span class='arcade__btn sound'><i class="fas fa-volume-mute"></i></span>
-    <span class='arcade__btn fullscreen'><i class="fas fa-expand"></i></span>
+    <div class="arcade_buttons">
+        <span class='arcade__btn sound'><i class="fas fa-volume-mute"></i></span>
+        <span class='arcade__btn fullscreen'><i class="fas fa-expand"></i></span>
+    </div>
 
 
     <div class="brand__container">
@@ -102,10 +106,13 @@
 
 <!--game-->
 <div id="Page3" style="display: none">
-    <span class='arcade__btn sound'><i class="fas fa-volume-mute"></i></span>
-    <span class='arcade__btn fullscreen'><i class="fas fa-expand"></i></span>
-    <span class='arcade__btn cancel'><i class="fas fa-undo"></i></span>
-    <span class='arcade__btn paused'><i class="fas fa-pause"></i></span>
+    <div class="arcade_buttons_game">
+        <span class='arcade__btn sound'><i class="fas fa-volume-mute"></i></span>
+        <span class='arcade__btn fullscreen'><i class="fas fa-expand"></i></span>
+        <span class='arcade__btn cancel'><i class="fas fa-undo"></i></span>
+        <span class='arcade__btn paused'><i class="fas fa-pause"></i></span>
+    </div>
+
 
     <div class="container-fluid d-flex" style="justify-content: space-between;">
         <div class="player__container ml-4">
