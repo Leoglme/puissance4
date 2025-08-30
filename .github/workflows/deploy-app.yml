@@ -1,0 +1,44 @@
+name: 🚀 Deploy Puissance 4 (static) to VPS
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_DIR: /var/www/puissance4.dibodev.fr/html
+      SOURCE_PATH: "."
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v5
+
+      - name: 📤 Deploy to VPS via rsync
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT }}
+          ARGS: "-azrut --delete"
+          SOURCE: "${{ env.SOURCE_PATH }}/"
+          TARGET: "${{ env.TARGET_DIR }}"
+          EXCLUDE: |
+            .git*
+            .github*
+            **/.DS_Store
+            README.md
+            LICENSE
+          SCRIPT_BEFORE: |
+            if ! command -v rsync &>/dev/null; then
+              echo "rsync not found, installing..."
+              sudo apt-get update && sudo apt-get install -y rsync
+            fi
+            sudo mkdir -p "${TARGET}"
+            sudo chown -R "${USER}:${USER}" "${TARGET}" || true
+            echo "Starting deployment to ${TARGET} ..."
+          SCRIPT_AFTER: |
+            echo "✅ Static site deployed to ${TARGET}!"

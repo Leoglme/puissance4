@@ -13,6 +13,8 @@ $(function () {
     class puissance4 {
         /*Construction du p4 avec par défaut 6 ligne X 7 colonne*/
         constructor($gamesId, $rows = 6, $cols = 7) {
+            this.history = [];
+            this.shouldAnimate = false;
             this.rows = $rows;
             this.cols = $cols;
             this.gamesId = $gamesId;
@@ -147,11 +149,15 @@ $(function () {
                 this.rowStatus = row;
                 this.colStatus = column;
                 this.set(row, column, this.turn);
+                this.history.push({ row, column, player: this.turn });
+                this.shouldAnimate = true;
                 return row;
             }
         }
 
         animate(){
+            if (!this.shouldAnimate) return;
+            this.shouldAnimate = false;
             let cible = $('.cellAnime[data-column=\''+this.colStatus+'\']');
             let currentColorP1 = $('.player1__avatar').css('background-color');
             let currentColorP2 = $('.player2__avatar').css('background-color');
@@ -261,12 +267,14 @@ $(function () {
 
         /*Reset/Vide le p4 => nouvelle game*/
         reset() {
+            this.shouldAnimate = false;
             for (let i = 0; i < this.rows; i++) {
                 for (let j = 0; j < this.cols; j++) {
                     this.pos[i][j] = 0;
                 }
             }
             this.winner = null;
+            this.history = [];
         }
 
         /*Lance une nouvelle Game*/
@@ -292,16 +300,21 @@ $(function () {
 
         /*Function annulé le coup précédent*/
         cancelGame() {
-            if (this.turn === 1) {
-                this.turn++;
-            } else if (this.turn === 2) {
-                this.turn--;
+            this.shouldAnimate = false;
+            if (!this.history.length) {
+                return;
             }
 
-            let lastCoin = $($('.player' + this.turn)[0])
-            this.pos[this.rowStatus][this.colStatus] = 0;
-            lastCoin.removeClass();
-            lastCoin.css("background", "white");
+            const last = this.history.pop();
+            // Rétablit l’état
+            this.pos[last.row][last.column] = 0;
+            this.moves = Math.max(0, this.moves - 1);
+            this.winner = null;
+            // C'est à nouveau au joueur qui venait de jouer ce coup
+            this.turn = last.player;
+
+            // Re-rendu propre (pas de bidouille DOM ciblée)
+            this.render();
         }
     }
 
@@ -310,8 +323,8 @@ $(function () {
 
     /*Appel Function annulé le coup précédent*/
     $('.cancel').on('click', function () {
-        newGame.playerRound();
         newGame.cancelGame();
+        newGame.playerRound();
     })
 
     class Interface {
@@ -370,8 +383,7 @@ $(function () {
         }
 
         newGame($p4Page, $homePage) {
-            /*Modal victoire => Au click du bouton recommencer reset le jeu et ferme le modal*/
-            /*Modal victoire => Action click, back menu , reset, close modal*/
+            this.shouldAnimate = false;
             if (winAlert.css("display") !== null || pausedAlert.css("display") !== null) {
                 $('.newGame').on('click', function () {
                     soundBtnVal.play();
