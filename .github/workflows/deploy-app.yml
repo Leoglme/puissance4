@@ -23,22 +23,23 @@ jobs:
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_USER: ${{ secrets.SSH_USERNAME }}
           REMOTE_PORT: ${{ secrets.SSH_PORT }}
+
           ARGS: "-azrut --delete"
+
           SOURCE: "${{ env.SOURCE_PATH }}/"
           TARGET: "${{ env.TARGET_DIR }}"
-          EXCLUDE: |
-            .git*
-            .github*
-            **/.DS_Store
-            README.md
-            LICENSE
+
+          EXCLUDE: ".git*,.github*,**/.DS_Store,README.md,LICENSE"
+
           SCRIPT_BEFORE: |
-            if ! command -v rsync &>/dev/null; then
-              echo "rsync not found, installing..."
+            TARGET="${{ env.TARGET_DIR }}"
+            if ! command -v rsync >/dev/null 2>&1; then
+              echo "Installing rsync..."
               sudo apt-get update && sudo apt-get install -y rsync
             fi
-            sudo mkdir -p "${TARGET}"
-            sudo chown -R "${USER}:${USER}" "${TARGET}" || true
-            echo "Starting deployment to ${TARGET} ..."
+            sudo mkdir -p "$TARGET"
+            echo "Starting deployment to $TARGET ..."
+
           SCRIPT_AFTER: |
-            echo "✅ Static site deployed to ${TARGET}!"
+            TARGET="${{ env.TARGET_DIR }}"
+            echo "✅ Static site deployed to $TARGET!"
