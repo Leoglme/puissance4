@@ -404,23 +404,51 @@ $(function () {
         }
 
         addMusic($p4Music) {
-            let soundIco = $('.sound');
-            //ajout de la musique du jeux => button mute/unmute
-            soundIco.on('click', function () {
-                let clicks = $(this).data('clicks');
-                if (clicks) {
-                    soundIco.html('<i class="fas fa-volume-mute"></i>');
-                    soundMute.play();
-                    soundMute.volume = 0.3;
-                    $p4Music.volume = 0;
-                } else {
-                    soundIco.html('<i class="fas fa-volume-up"></i>');
-                    $p4Music.play();
-                    $p4Music.volume = 0.3;
-                    $p4Music.loop = true;
+            const $buttons = $('.arcade__btn.sound');
+
+            // état UI
+            const updateIcon = (mutedOrPaused) => {
+                $buttons.html(mutedOrPaused
+                    ? '<i class="fas fa-volume-mute"></i>'
+                    : '<i class="fas fa-volume-up"></i>');
+            };
+
+            // démarrer en "muet" (si tu veux le son off au début)
+            $p4Music.muted = true;
+            $p4Music.loop = true;
+            updateIcon(true);
+
+            // iOS-friendly: on utilise muted/pause, pas volume
+            $buttons.on('click', async function () {
+                try {
+                    // si jamais la musique n'a pas encore démarré
+                    if ($p4Music.paused && $p4Music.muted) {
+                        $p4Music.muted = false;
+                        $p4Music.loop = true;
+                        await $p4Music.play();   // gesture utilisateur → OK sur iOS
+                        updateIcon(false);
+                        return;
+                    }
+
+                    // toggle mute (et pause pour économiser la batterie)
+                    if ($p4Music.muted) {
+                        $p4Music.muted = false;
+                        await $p4Music.play();   // relance propre
+                        updateIcon(false);
+                    } else {
+                        $p4Music.muted = true;
+                        $p4Music.pause();
+                        updateIcon(true);
+                    }
+
+                    // petit son "mute" si tu veux garder ton feedback
+                    // (optionnel, et évite de le jouer si déjà mute)
+                    // if ($p4Music.muted) { soundMute.currentTime = 0; soundMute.play().catch(()=>{}); }
+
+                } catch (e) {
+                    console.warn('Audio toggle failed:', e);
                 }
-                $(this).data("clicks", !clicks);
-            })
+            });
         }
 
         /*color picker*/
@@ -507,17 +535,51 @@ $(function () {
 
         /*Button full screen*/
         screenAction($elem) {
+            const doc = document;
+
+            const isFullscreen = () =>
+                doc.fullscreenElement ||
+                doc.webkitFullscreenElement ||
+                doc.msFullscreenElement ||
+                false;
+
+            const requestFS = (el) =>
+                (el.requestFullscreen && el.requestFullscreen()) ||
+                (el.webkitRequestFullscreen && el.webkitRequestFullscreen()) ||
+                (el.msRequestFullscreen && el.msRequestFullscreen());
+
+            const exitFS = () =>
+                (doc.exitFullscreen && doc.exitFullscreen()) ||
+                (doc.webkitExitFullscreen && doc.webkitExitFullscreen()) ||
+                (doc.msExitFullscreen && doc.msExitFullscreen());
+
             $elem.on('click', function () {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
-                    $('.p4_logo').css("width", '30%');
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                        $('.p4_logo').css("width", '25%');
-                    }
+                // IMPORTANT : appel direct dans le clique
+                const el = document.documentElement;
+
+                // Si l'API n'est pas dispo => fallback iOS
+                const apiAvailable =
+                    el.requestFullscreen ||
+                    el.webkitRequestFullscreen ||
+                    el.msRequestFullscreen;
+
+                if (!apiAvailable) {
+                    // Fallback iOS : proposer l’ajout à l’écran d’accueil
+                    // ou basculer une "UI plein écran" CSS maison
+                    alert(
+                        "Le mode plein écran n'est pas pris en charge par ce navigateur.\n" +
+                        "Astuce iPhone : ajoute le site à l’écran d’accueil pour l’ouvrir en plein écran."
+                    );
+                    document.body.classList.toggle('pseudo-fullscreen');
+                    return;
                 }
-            })
+
+                if (!isFullscreen()) {
+                    requestFS(el);
+                } else {
+                    exitFS();
+                }
+            });
         }
 
         openPaused() {
@@ -551,6 +613,15 @@ $(function () {
         .removeClass()
         .addClass('player2__avatar color__1');
     $('#color-4').prop('checked', true); // coche le bon bouton
+
+
+    // Active la classe "pressée" sur touch/mouse (iOS friendly)
+    const pressStart = ('ontouchstart' in window) ? 'touchstart' : 'mousedown';
+    const pressEnd   = ('ontouchend'   in window) ? 'touchend touchcancel' : 'mouseup mouseleave';
+
+    $('.arcade__btn')
+        .on(pressStart, function () { $(this).addClass('is-active'); })
+        .on(pressEnd,   function () { $(this).removeClass('is-active'); });
 })
 
 
